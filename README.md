@@ -1,6 +1,21 @@
 # CP-Net Generator - Python
 This project is an attempt to create a fork of GenCPNet which is written entirely in Python. The reason behind this is simple, while execution speed will be affected, the ability to directly hook an acyclic CP-net generator up to an existing Python program would speed up work flows significantly (particular for research.) This will attempt to be a 1:1 replacement for GenCPNet code, with improvements where possible. Additionally, it will hopefully create an easier install process (assuming this can be provided as a python package) compared with the original, given the age of the program.
 
+Current Checklist:
+- [ ] MVP Checklist:
+  - [X] Properly Parses Arguments
+    - [X] Created Arg Parser Object
+    - [X] Accepts all original options
+  - [ ] Data Structures Transcribed
+  - [ ] Computations Transcribed
+  - [ ] XML Output Working
+  - [ ] Debugging
+- [ ] Stretch Goals
+  - [ ] Efficiency Pass
+  - [ ] Internal Representation Documentation
+  - [ ] Package on PyPI
+  - [ ] Additional Command Line Arguments
+
 The original README is copied below:
 
 # CP-Net Generator
