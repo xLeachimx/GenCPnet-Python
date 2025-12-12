@@ -23,15 +23,36 @@ class CPT:
         self.__indegree = indegree
         self.__incomp_chance = incomp_chance
         self.__domain = domain
-        self.__table = None
-        while self.__table is None or self.__is_degen():
+        self.__table: None | dict[str | tuple[int,...], tuple[int,...]] = None
+        if indegree == 0:
             self.__table = dict()
-            all_rows = itertools.product(domain.feature_values(), repeat=indegree)
-            for row in all_rows:
-                if random.uniform(0.0, 1.0) >= incomp_chance:
-                    order = domain.feature_values()
-                    random.shuffle(order)
-                    self.__table[row] = order
+            order = domain.feature_values()
+            random.shuffle(order)
+            self.__table['default'] = tuple(order)
+        else:
+            while self.__table is None or self.__is_degen():
+                self.__table = dict()
+                all_rows = itertools.product(domain.feature_values(), repeat=indegree)
+                for row in all_rows:
+                    if random.uniform(0.0, 1.0) >= incomp_chance:
+                        order = domain.feature_values()
+                        random.shuffle(order)
+                        self.__table[row] = tuple(order)
+
+    def get_order(self, alt_project: tuple[int,...]) -> tuple[int,...] | None:
+        """
+        Gets the preference order given a projected alternative (only containing pertinent attrs, in proper order) for
+        the CPTs attribute.
+        :param alt_project: A tuple of integer values indicating the required attribute values to make an order
+            determination. If len(alt_project) is 0 then the default is returned.
+        :return: The ordered list of values for the attr the CPT represents. If None is returned then a CPT row does
+            not exist, likely due to incompleteness.
+        """
+        if len(alt_project) == 0:
+            return self.__table['default']
+        elif alt_project in self.__table:
+            return self.__table[alt_project]
+        return None
 
     def __is_degen(self):
         """
@@ -52,7 +73,7 @@ class CPT:
                 # Find rows with identical settings (except the attr in question.)
                 for idx in range(1, len(val_rows)):
                     for row in val_rows[idx]:
-                        if CPT.__matching_except(top_row, row, attr):
+                        if CPT.matching_except(top_row, row, attr):
                             matching_rows.append(row)
                 # For those matching rows see if anything changes, if so then dependency exists.
                 for row in matching_rows:
@@ -66,7 +87,7 @@ class CPT:
         return True
 
     @staticmethod
-    def __matching_except(lst1: list, lst2: list, idx: int) -> bool:
+    def matching_except(lst1: list | tuple, lst2: list | tuple, idx: int) -> bool:
         """
         Returns true iff two lists are the same, except for at the provided index.
         :param lst1: A list of items to compare.
@@ -77,33 +98,43 @@ class CPT:
         return lst1[:idx] == lst2[:idx] and lst1[idx+1:] == lst2[idx+1:]
 
 
-def degen_multi(cpt: dict[list[int], list[int]], indegree: int, dom_size: int) -> bool:
+class CPNode:
+    def __init__(self, attr: int, parents: list[int], incomp_chance: float, domain: Domain):
+        """
+        Constructor for the CPNode class. Generates a random CPT for the node as well.
+        :param attr: The attribute the node is associated with.
+        :param parents: The list of parents of the node.
+        :param incomp_chance: The chance that a row is missing from the CPT.
+        :param domain: The domain of valid alternatives.
+        """
+        self.__attr = attr
+        self.__parents = parents
+        self.__domain = domain
+        self.__cpt = CPT(len(parents), incomp_chance, domain)
 
-    # For each attribute determine if the given cpt depends on it.
-    for attr in range(indegree):
-        # Test all pairs of values
-        for val1 in range(dom_size):
-            for val2 in range(val1+1, dom_size):
-                val1_rows = []
-                val2_rows = []
-                # Extract pertinent rows
-                for key in cpt.keys():
-                    if key[attr] == val1:
-                        val1_rows.append(key)
-                    elif key[attr] == val2:
-                        val2_rows.append(key)
-                # Find rows which are the same except for the attr under consideration
-                dependent = False
-                for v1_row in val1_rows:
-                    for v2_row in val2_rows:
-                        if match_except(v1_row, v2_row, attr):
-                            # Determine if they are the same or not. If not then we have dependency.
-                            if cpt[v1_row] != cpt[v2_row]:
-                                dependent = True
-                            break
-                    if dependent:
-                        break
-                # Once we find a lack of dependence once, we know it is degenerate.
-                if not dependent:
-                    return True
-    return False
+    def dominates(self, alt1: Alternative, alt2: Alternative) -> bool | None:
+        """
+        Determines if alt1 dominates alt2. Only works if alt1 and alt2 only differ on the node's attribute.
+        :param alt1: A valid alternative.
+        :param alt2: A valid alternative.
+        :return: True if alt1 > alt2, false if alt1 <= alt2. Returns None if alt1 >< alt2.
+        """
+        if not CPT.matching_except(alt1.as_tuple(), alt2.as_tuple(), self.__attr):
+            raise ValueError("Cannot compare two alternatives at a node if they differ in > 1 attribute.")
+        cpt_proj = alt1.project(self.__parents)
+        order = self.__cpt.get_order(cpt_proj)
+        if order is None:
+            return None
+        return order.index(alt1[self.__attr]) < order.index(alt2[self.__attr])
+
+    def worsening_flips(self, alt: Alternative) -> tuple[int,...]:
+        """
+        Finds all worsening flip values for the given alternative at the given node.
+        :param alt: A valid alternative.
+        :return: A list of all worsening flip values according to the node. May return empty list.
+        """
+        cpt_proj = alt.project(self.__parents)
+        order = self.__cpt.get_order(cpt_proj)
+        if order is None:
+            return tuple()
+        return order[order.index(alt[self.__attr])+1:]

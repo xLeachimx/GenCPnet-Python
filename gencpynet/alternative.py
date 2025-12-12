@@ -27,6 +27,18 @@ class Alternative:
         """
         return len(self.__feature_values)
 
+    def flip(self, attr: int, val: int) -> 'Alternative':
+        """
+        Applies a flip to the given alternative. (not in-place)
+        :param attr: The attribute to modify.
+        :param val: The value to give the new attribute.
+        :return: A copy of the alternative, with the flip applied.
+        """
+        nVals = self.__feature_values[:]
+        nVals[attr] = val
+        return Alternative(nVals)
+
+
     def project(self, indices: list[int]) -> tuple[int,...]:
         """
         Returns the projection of the alternative to the given indices (in that order.)
