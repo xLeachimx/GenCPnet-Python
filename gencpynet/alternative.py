@@ -84,6 +84,12 @@ class Domain:
         """
         return self.__dom_size ** self.__features
 
+    def feature_values(self) -> list[int]:
+        return [i for i in range(self.__dom_size)]
+
+    def feature_domain_size(self) -> int:
+        return self.__dom_size
+
     def is_member(self, alt: Alternative) -> bool:
         """
         Returns true if the alternative could be a member of the current domain.
