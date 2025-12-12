@@ -65,9 +65,9 @@ bool degen_multi( unsigned int m, // number of inputs (indegree)
     int r = 0; // init row
     while (r < nAsst) {
       for (int x = 1; x <= DOM_SIZE; ++x) {
-	for (int copies = 0; copies < int(pow(DOM_SIZE, m - c - 1)); ++copies)
-	  cpt[r++][c] = x;
-      } // end for copies
+	    for (int copies = 0; copies < int(pow(DOM_SIZE, m - c - 1)); ++copies)
+	        cpt[r++][c] = x;
+        } // end for copies
     } // end while r
   } // end for c
 

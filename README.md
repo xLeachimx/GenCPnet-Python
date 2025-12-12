@@ -1,15 +1,32 @@
 # CP-Net Generator - Python
-This project is an attempt to create a fork of GenCPNet which is written entirely in Python. The reason behind this is simple, while execution speed will be affected, the ability to directly hook an acyclic CP-net generator up to an existing Python program would speed up work flows significantly (particular for research.) This will attempt to be a 1:1 replacement for GenCPNet code, with improvements where possible. Additionally, it will hopefully create an easier install process (assuming this can be provided as a Python package) compared with the original, given the age of the program.
+This project is an attempt to create a fork of GenCPNet which is written entirely in Python. The reason behind this is
+simple, while execution speed will be affected, the ability to directly hook an acyclic CP-net generator up to an
+existing Python program would speed up work flows significantly (particular for research.) This will attempt to be a
+1:1 replacement for GenCPNet code, with improvements where possible. Additionally, it will hopefully create an easier
+install process (assuming this can be provided as a Python package) compared with the original, given the age of the
+program.
 
+## Rework Updates
+
+Update (11 Dec 2025):
+As time goes on this project seems more and more to need a major redesign. Likely this program will end up
+algorithmically equivalent, but using more proper Pythonic OOP practices. The original relies heavily on bit
+manipulation, which is efficient, but not
+
+## Rework Checklist
 Current Checklist:
 - [ ] MVP Checklist:
   - [X] Properly Parses Arguments
     - [X] Created Arg Parser Object
     - [X] Accepts all original options
-  - [ ] Data Structures Transcribed
-    - [ ] Tables
-    - [ ] Counts
-  - [ ] Computations Transcribed
+  - [ ] Base Classes Needed:
+    - [ ] Alternative
+    - [ ] Conditional Preference Table
+    - [ ] Conditional Preference Network
+  - [ ] Algorithms
+    - [ ] Counting number of CP-nets
+    - [ ] DAG generation
+    - [ ] CPT generation
   - [ ] XML Output Working
   - [ ] Debugging
 - [ ] Stretch Goals
